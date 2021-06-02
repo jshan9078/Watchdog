@@ -72,9 +72,6 @@ async def on_member_remove(member):
   channel = client.get_channel(finder(member,"general"))
   await channel.send(f"{member} has left the server")
 
-
-
-
 #log message sent
 
 """"
