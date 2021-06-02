@@ -102,10 +102,8 @@ async def update():
       current = datetime.now()
       currentDisplay = current.strftime("%d/%m/%Y %H:%M:%S")
 
-      with open("serverstats","a") as f:
-        f.write(f'Time: {currentDisplay}, Messages: {messages}, Members Joined: {joined}, Members Who Left: {left}\n')
-        channel = client.get_channel(livelogs_private)
-        await channel.send(f'`Time: {currentDisplay}, Messages: {messages}, Members Joined: {joined}, Members Who Left: {left}\n`')
+      channel = client.get_channel(livelogs_private)
+      await channel.send(f'`Time: {currentDisplay}, Messages: {messages}, Members Joined: {joined}, Members Who Left: {left}\n`')
 
       messages=0  
       joined=0
