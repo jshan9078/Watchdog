@@ -26,7 +26,7 @@ livelogs_private = 847569900435931207
 
 global finder
 def finder(message, channel):
-    with open ("servers",'r') as f:
+    with open ("ModerationBot/servers",'r') as f:
       lines = f.readlines()
       for i in range(len(lines)):
         currentLines = lines[i].strip()
@@ -84,8 +84,6 @@ async def on_message(message):
     await channel.send("Message Sent")
 
 """
-
-
 
 #background tasks
 async def update():

@@ -45,8 +45,6 @@ class Moderation(commands.Cog):
     else:
       await ctx.send("Member Doesnt Exist")
 
-        
-
   @ban.error
   async def ban_error(self, ctx, error):
     if isinstance(error,commands.MissingRequiredArgument):
@@ -74,7 +72,7 @@ class Moderation(commands.Cog):
   #nickname changes
   @commands.command()
   @commands.has_permissions(manage_nicknames=True)
-  async def nick(self, ctx,member: discord.Member,nick):
+  async def nick(self, ctx,member: discord.Member,*,nick):
       await member.edit(nick=nick)
       await ctx.send(f'Changed nickname for {member.mention}')
 
