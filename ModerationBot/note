@@ -1,0 +1,39 @@
+server 1: private server
+server 2: computer club demonstration server
+
+#ban
+@client.command()
+@commands.has_permissions(ban_members=True)
+async def ban(ctx, member: discord.Member,*,reason=None):
+  await member.ban(reason=reason)
+  await ctx.send(f'Banned {member.mention}')
+
+@ban.error
+async def ban(ctx, error):
+  if isinstance(error,commands.MissingRequiredArgument):
+    await ctx.send("```Please include the user you wish to ban.```")
+  
+#unban
+@client.command()
+@commands.has_permissions(ban_members=True)
+async def unban(ctx, *,member):
+  banned_users = await ctx.guild.bans()
+  member_name, member_discriminator = member.split('#')
+  for ban_entry in banned_users:
+    user = ban_entry.user
+    if (user.name, user.discriminator) == (member_name, member_discriminator):
+      await ctx.guild.unban(user)
+      await ctx.send(f'Unbanned {user.mention}')
+      return
+  await ctx.send("```User is not banned.```")
+
+@unban.error
+async def unban(ctx, error):
+  if isinstance(error,commands.MissingRequiredArgument):
+    await ctx.send("```Please include the user you wish to unban.```")
+
+work on ban/unban
+test stuff
+sigh
+
+
