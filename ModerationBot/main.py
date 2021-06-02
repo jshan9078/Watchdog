@@ -11,7 +11,7 @@ my_secret = os.environ['token']
 intents = discord.Intents.all()
 client =  commands.Bot(command_prefix = 'v!', intents=intents)
 
-for filename in os.listdir('./cogs'):
+for filename in os.listdir('ModerationBot/cogs'):
   if filename.endswith('.py'):
     client.load_extension(f'cogs.{filename[:-3]}')
 
