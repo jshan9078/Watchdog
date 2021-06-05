@@ -39,8 +39,6 @@ for i in range(len(d)):
     wcord+=1
 
 
-#change ids as seen fit
-<<<<<<< HEAD
 livelogs_private = int(os.environ['livelogsprivate'])
 
 global finder2
@@ -55,25 +53,6 @@ def finder2(message,channel):
         return serverdata[i][0]
       else:
         return serverdata[i][1]
-=======
-livelogs_private = 847569900435931207
-
-global finder
-def finder(message, channel):
-    with open ("ModerationBot/servers",'r') as f:
-      lines = f.readlines()
-      for i in range(len(lines)):
-        currentLines = lines[i].strip()
-        if (int(currentLines[0:18])==message.guild.id):
-          if (channel=="logs"):
-            return int(currentLines[38:56])
-          elif (channel=="livelogs"):
-            return int(currentLines[57:75])
-          elif (channel=="guild"):
-            return int(currentLines[0:18])
-          else:
-            return int(currentLines[19:37])
->>>>>>> 9d37e8b6bd51edbed39cfabfd754534766bc54ce
 
 #bot active
 @client.event
