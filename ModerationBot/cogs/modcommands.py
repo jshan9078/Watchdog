@@ -45,8 +45,6 @@ class Moderation(commands.Cog):
     else:
       await ctx.send("Member Doesnt Exist")
 
-        
-
   @ban.error
   async def ban_error(self, ctx, error):
     if isinstance(error,commands.MissingRequiredArgument):
@@ -58,13 +56,23 @@ class Moderation(commands.Cog):
   async def unban(self, ctx, *,member):
     banned_users = await ctx.guild.bans()
     member_name, member_discriminator = member.split('#')
+    i=0
     for ban_entry in banned_users:
-      user = ban_entry.user
-      if (user.name, user.discriminator) == (member_name, member_discriminator):
-        await ctx.guild.unban(user)
-        await ctx.send(f'Unbanned {user.mention}')
-        return
-    await ctx.send("```User is not banned.```")
+      user1 = ban_entry.user
+      if str(user1)==str(member):
+        print("breh")
+      i+=1
+    print(i)
+    #except discord.NotFound:
+      #await ctx.send('```The user is not banned.```')
+      #return
+    
+    # for ban_entry in banned_users:
+      # user = ban_entry.user
+      # if (user.name, user.discriminator) == (member_name, # member_discriminator):
+        # await ctx.guild.unban(user)
+        # await ctx.send(f'Unbanned {user.mention}')
+    # await ctx.send("```User is not banned.```")
 
   @unban.error
   async def unban_error(self, ctx, error):
@@ -74,7 +82,7 @@ class Moderation(commands.Cog):
   #nickname changes
   @commands.command()
   @commands.has_permissions(manage_nicknames=True)
-  async def nick(self, ctx,member: discord.Member,nick):
+  async def nick(self, ctx,member: discord.Member,*,nick):
       await member.edit(nick=nick)
       await ctx.send(f'Changed nickname for {member.mention}')
 

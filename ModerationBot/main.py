@@ -21,24 +21,39 @@ messages = 0
 joined = 0
 left = 0
 
-#change ids as seen fit
-livelogs_private = 847569900435931207
+servercount = int(os.environ['sc'])
 
-global finder
-def finder(message, channel):
-    with open ("servers",'r') as f:
-      lines = f.readlines()
-      for i in range(len(lines)):
-        currentLines = lines[i].strip()
-        if (int(currentLines[0:18])==message.guild.id):
-          if (channel=="logs"):
-            return int(currentLines[38:56])
-          elif (channel=="livelogs"):
-            return int(currentLines[57:75])
-          elif (channel=="guild"):
-            return int(currentLines[0:18])
-          else:
-            return int(currentLines[19:37])
+d = os.environ['sd'].split(",")
+
+serverdata = [[0 for x in range(4)] for y in range(servercount)] 
+
+wcord = 0
+hcord = 0
+
+for i in range(len(d)):
+  serverdata[wcord][hcord]=d[i]
+  serverdata[wcord][hcord] = int(serverdata[wcord][hcord])
+  hcord+=1
+  if (hcord==4):
+    hcord=0
+    wcord+=1
+
+
+#change ids as seen fit
+livelogs_private = int(os.environ['livelogsprivate'])
+
+global finder2
+def finder2(message,channel):
+  for i in range(servercount):
+    if (serverdata[i][0]==message.guild.id):
+      if (channel=="logs"):
+        return serverdata[i][2]
+      elif (channel=="livelogs"):
+        return serverdata[i][3]
+      elif (channel=="guild"):
+        return serverdata[i][0]
+      else:
+        return serverdata[i][1]
 
 #bot active
 @client.event
@@ -60,7 +75,7 @@ async def on_command_error (ctx, error):
 async def on_member_join(member):
   global joined
   joined+=1
-  channel = client.get_channel(finder(member,"general"))
+  channel = client.get_channel(finder2(member,"general"))
   await channel.send("Hey. Welcome.")
 
 #leave
@@ -69,7 +84,7 @@ async def on_member_join(member):
 async def on_member_remove(member):
   global left
   left+=1
-  channel = client.get_channel(finder(member,"general"))
+  channel = client.get_channel(finder2(member,"general"))
   await channel.send(f"{member} has left the server")
 
 #log message sent
@@ -84,8 +99,6 @@ async def on_message(message):
     await channel.send("Message Sent")
 
 """
-
-
 
 #background tasks
 async def update():
@@ -126,15 +139,8 @@ async def on_message_delete(message):
   embed.add_field(name="**From**",value=f"{message.author.mention}", inline=True)
   embed.add_field(name="**Channel**",value=f'{message.channel.mention}', inline=True)
   embed.add_field(name="Content", value=message.content, inline=False)
-  channel = client.get_channel(finder(message,"logs"))
+  channel = client.get_channel(finder2(message,"logs"))
   await channel.send(embed=embed)
 
 client.loop.create_task(update())
 client.run(my_secret)
-
-
-
-
-
-
-
