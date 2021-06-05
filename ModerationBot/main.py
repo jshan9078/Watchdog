@@ -38,11 +38,10 @@ for i in range(len(d)):
     hcord=0
     wcord+=1
 
-
 livelogs_private = int(os.environ['livelogsprivate'])
 
-global finder2
-def finder2(message,channel):
+global finder
+def finder(message,channel):
   for i in range(servercount):
     if (serverdata[i][0]==message.guild.id):
       if (channel=="logs"):
@@ -74,7 +73,7 @@ async def on_command_error (ctx, error):
 async def on_member_join(member):
   global joined
   joined+=1
-  channel = client.get_channel(finder2(member,"general"))
+  channel = client.get_channel(finder(member,"general"))
   await channel.send("Hey. Welcome.")
 
 #leave
@@ -83,7 +82,7 @@ async def on_member_join(member):
 async def on_member_remove(member):
   global left
   left+=1
-  channel = client.get_channel(finder2(member,"general"))
+  channel = client.get_channel(finder(member,"general"))
   await channel.send(f"{member} has left the server")
 
 #log message sent
@@ -138,7 +137,7 @@ async def on_message_delete(message):
   embed.add_field(name="**From**",value=f"{message.author.mention}", inline=True)
   embed.add_field(name="**Channel**",value=f'{message.channel.mention}', inline=True)
   embed.add_field(name="Content", value=message.content, inline=False)
-  channel = client.get_channel(finder2(message,"logs"))
+  channel = client.get_channel(finder(message,"logs"))
   await channel.send(embed=embed)
 
 client.loop.create_task(update())
