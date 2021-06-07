@@ -11,6 +11,36 @@ my_secret = os.environ['token']
 intents = discord.Intents.all()
 client =  commands.Bot(command_prefix = 'v!', intents=intents)
 
+global check_owner
+def check_owner(ctx):
+  if (ctx.author.id==620402532346232832 or ctx.author.id==800531315602227241 or ctx.author.id==555494011947974667):
+    return True
+
+@client.command(hidden=True)
+async def reload(ctx, *, extension):
+  if (check_owner(ctx)==True):
+    client.unload_extension(f'cogs.{extension}')
+    client.load_extension(f'cogs.{extension}')
+    await ctx.send(f"```Succesfully Reloaded {extension}```")
+  else:
+    await ctx.send("```You do not own the bot, so you don't have the ability to run this command.```")
+
+@client.command(hidden=True)
+async def unload(ctx, *, extension):
+  if (check_owner(ctx)==True):
+    client.unload_extension(f'cogs.{extension}')
+    await ctx.send(f"```Succesfully Unloaded {extension}```")
+  else:
+    await ctx.send("```You do not own the bot, so you don't have the ability to run this command.```")
+
+@client.command(hidden=True)
+async def load(ctx, *, extension):
+  if (check_owner(ctx)==True):
+    client.load_extension(f'cogs.{extension}')
+    await ctx.send(f"```Succesfully Loaded {extension}```")
+  else:
+    await ctx.send("```You do not own the bot, so you don't have the ability to run this command.```")
+
 for filename in os.listdir('ModerationBot/cogs'):
   if filename.endswith('.py'):
     client.load_extension(f'cogs.{filename[:-3]}')
@@ -38,11 +68,10 @@ for i in range(len(d)):
     hcord=0
     wcord+=1
 
-
 livelogs_private = int(os.environ['livelogsprivate'])
 
-global finder2
-def finder2(message,channel):
+global finder
+def finder(message,channel):
   for i in range(servercount):
     if (serverdata[i][0]==message.guild.id):
       if (channel=="logs"):
@@ -74,7 +103,7 @@ async def on_command_error (ctx, error):
 async def on_member_join(member):
   global joined
   joined+=1
-  channel = client.get_channel(finder2(member,"general"))
+  channel = client.get_channel(finder(member,"general"))
   await channel.send("Hey. Welcome.")
 
 #leave
@@ -83,7 +112,7 @@ async def on_member_join(member):
 async def on_member_remove(member):
   global left
   left+=1
-  channel = client.get_channel(finder2(member,"general"))
+  channel = client.get_channel(finder(member,"general"))
   await channel.send(f"{member} has left the server")
 
 #log message sent
@@ -138,7 +167,7 @@ async def on_message_delete(message):
   embed.add_field(name="**From**",value=f"{message.author.mention}", inline=True)
   embed.add_field(name="**Channel**",value=f'{message.channel.mention}', inline=True)
   embed.add_field(name="Content", value=message.content, inline=False)
-  channel = client.get_channel(finder2(message,"logs"))
+  channel = client.get_channel(finder(message,"logs"))
   await channel.send(embed=embed)
 
 client.loop.create_task(update())

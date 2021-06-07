@@ -57,22 +57,18 @@ class Moderation(commands.Cog):
     banned_users = await ctx.guild.bans()
     member_name, member_discriminator = member.split('#')
     i=0
+    if (len(banned_users)==0):
+      await ctx.send("```The user you tried to unban is not banned.```")
     for ban_entry in banned_users:
       user1 = ban_entry.user
       if str(user1)==str(member):
-        print("breh")
+        await ctx.guild.unban(user1)
+        await ctx.send(f'Unbanned {user1.mention}')
+        break
+      elif (i==len(banned_users)-1):
+        await ctx.send("```The user you tried to unban is not banned.```")
+        break
       i+=1
-    print(i)
-    #except discord.NotFound:
-      #await ctx.send('```The user is not banned.```')
-      #return
-    
-    # for ban_entry in banned_users:
-      # user = ban_entry.user
-      # if (user.name, user.discriminator) == (member_name, # member_discriminator):
-        # await ctx.guild.unban(user)
-        # await ctx.send(f'Unbanned {user.mention}')
-    # await ctx.send("```User is not banned.```")
 
   @unban.error
   async def unban_error(self, ctx, error):
