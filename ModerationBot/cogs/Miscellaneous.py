@@ -18,6 +18,7 @@ class Miscellaneous(commands.Cog):
   async def on_message(self, message):
     if message.content.find("hello") != -1:
       await message.channel.send("hi")
+    
 
   #8ball
   @commands.command(aliases=['8ball', 'eightball'])
@@ -69,6 +70,24 @@ class Miscellaneous(commands.Cog):
     embed.add_field(name="Discord Bots",value="We also show discord bots with discord.py", inline=True)
     embed.add_field(name="Club-Wide Server",value="{}, Click here to join our official discord server.  https://discord.gg/gK5apkeZNk".format(ctx.author.display_name,ctx.author.display_name), inline=False)
     embed.set_footer(text="We hope you check it out.")
+    await ctx.send(embed=embed)
+
+  @commands.command()
+  async def bott(self,ctx):
+    embed=discord.Embed(title="Thanks for having me :)", description="I am a moderation bot making it easier to manage your server.", color=0x34b4eb)
+    
+    embed.set_author(name="Watchdog#4044",icon_url=self.client.user.avatar_url)
+    embed.set_thumbnail(url=ctx.guild.icon_url)
+
+    embed.add_field(name="Choose your General Channel",value="`v!general [channel]`", inline=False)
+
+    embed.add_field(name="Choose your Logs Channel",value="`v!logs [channel]`", inline=False)
+
+    embed.add_field(name="Choose your Live Stats Channel",value="`v!livestats [channel]`", inline=False)
+
+    embed.add_field(name="For more info...",value="`v!help`", inline=False)
+
+    embed.set_footer(text="Thanks for using Watchdog.")
     await ctx.send(embed=embed)
 
 def setup(client):
