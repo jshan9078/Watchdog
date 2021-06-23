@@ -18,7 +18,6 @@ class Miscellaneous(commands.Cog):
   async def on_message(self, message):
     if message.content.find("hello") != -1:
       await message.channel.send("hi")
-    
 
   #8ball
   @commands.command(aliases=['8ball', 'eightball'])

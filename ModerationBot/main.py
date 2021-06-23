@@ -10,7 +10,7 @@ from datetime import datetime #reminders
 
 my_secret = os.environ['token']
 intents = discord.Intents.all()
-client =  commands.Bot(command_prefix = 'v!', intents=intents)
+client =  commands.Bot(command_prefix = '+', intents=intents)
 
 global check_owner
 def check_owner(ctx):
@@ -52,42 +52,24 @@ messages = 0
 joined = 0
 left = 0
 
-servercount = int(os.environ['sc'])
+def direct(message,channel):
+  value = ""
+  if channel=="general":
+    value = db["s"+str(message.guild.id)+"g"]
 
-d = os.environ['sd'].split(",")
+  elif channel=="logs":
+    value = db["s"+str(message.guild.id)+"l"]
 
-serverdata = [[0 for x in range(4)] for y in range(servercount)] 
-
-wcord = 0
-hcord = 0
-
-for i in range(len(d)):
-  serverdata[wcord][hcord]=d[i]
-  serverdata[wcord][hcord] = int(serverdata[wcord][hcord])
-  hcord+=1
-  if (hcord==4):
-    hcord=0
-    wcord+=1
-
-livelogs_private = int(os.environ['livelogsprivate'])
-
-global finder
-def finder(message,channel):
-  for i in range(servercount):
-    if (serverdata[i][0]==message.guild.id):
-      if (channel=="logs"):
-        return serverdata[i][2]
-      elif (channel=="livelogs"):
-        return serverdata[i][3]
-      elif (channel=="guild"):
-        return serverdata[i][0]
-      else:
-        return serverdata[i][1]
+  elif channel=="livelogs":
+    value = db["s"+str(message.guild.id)+"ls"]
+  
+  return int(value)
+  
 
 #bot active
 @client.event
 async def on_ready(): 
-  await client.change_presence(status=discord.Status.idle, activity=discord.Game('Trying to program, but failing :D'))
+  await client.change_presence(status=discord.Status.dnd, activity=discord.Game('Trying to program, but failing :D'))
   print('Bot is Ready.')
 
 #error handling for invalid commands
@@ -104,7 +86,7 @@ async def on_command_error (ctx, error):
 async def on_member_join(member):
   global joined
   joined+=1
-  channel = client.get_channel(finder(member,"general"))
+  channel = client.get_channel(direct(member,"general"))
   await channel.send("Hey. Welcome.")
 
 #leave
@@ -113,7 +95,7 @@ async def on_member_join(member):
 async def on_member_remove(member):
   global left
   left+=1
-  channel = client.get_channel(finder(member,"general"))
+  channel = client.get_channel(direct(member,"general"))
   await channel.send(f"{member} has left the server")
 
 #log message sent
@@ -168,7 +150,7 @@ async def on_message_delete(message):
   embed.add_field(name="**From**",value=f"{message.author.mention}", inline=True)
   embed.add_field(name="**Channel**",value=f'{message.channel.mention}', inline=True)
   embed.add_field(name="Content", value=message.content, inline=False)
-  channel = client.get_channel(finder(message,"logs"))
+  channel = client.get_channel(direct(message,"logs"))
   await channel.send(embed=embed)
 
 client.loop.create_task(update())
