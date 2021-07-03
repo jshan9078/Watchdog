@@ -1,3 +1,4 @@
+from replit import db
 import discord
 from discord.ext import commands
 import random
@@ -16,12 +17,20 @@ class Miscellaneous(commands.Cog):
   #auto responder
   @commands.Cog.listener()
   async def on_message(self, message):
+    db["s"+str(message.guild.id)] = str(message.guild.id)
+    matches = db.prefix("s"+str(message.guild.id)+"ls")
+    if (message.author.bot and len(matches)==1):
+      current_count_messages = int(db["s"+str(message.guild.id)+"bot"])
+      db["s"+str(message.guild.id)+"bot"] = str(current_count_messages+1)
+    if (len(matches)==1):
+      current_count_messages = int(db["s"+str(message.guild.id)+"messages"])
+      db["s"+str(message.guild.id)+"messages"] = str(current_count_messages+1)
     if message.content.find("hello") != -1:
       await message.channel.send("hi")
 
   #8ball
-  @commands.command(aliases=['8ball', 'eightball'])
-  async def _8ball(self, ctx, *, question):
+  @commands.command(aliases=['8ball'])
+  async def eightball(self, ctx, *, question):
     responses = ["It is certain.",
           "It is decidedly so.",
           "Without a doubt.",
@@ -44,7 +53,7 @@ class Miscellaneous(commands.Cog):
           "Very doubtful."]
     await ctx.send(f':8ball: Question: {question}\n:8ball: Answer: {random.choice(responses)}')
   
-  @_8ball.error
+  @eightball.error
   async def ball_error(self, ctx, error):
     if isinstance(error,commands.MissingRequiredArgument):
       await ctx.send("```Please include a question for the almighty 8ball to answer.```")
