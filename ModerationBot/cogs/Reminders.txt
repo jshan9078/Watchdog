@@ -1,0 +1,165 @@
+from replit import db
+import discord
+from discord.ext import commands
+from datetime import datetime #reminders
+from dateutil.relativedelta import relativedelta
+from main import DurationConverter, display_time, server_prefix, TimeConverter
+
+class Reminders(commands.Cog):
+
+  def __init__(self, client):
+    self.client = client
+    
+  @commands.command()
+  async def st(self,ctx, timing: TimeConverter):
+    date_time_obj = datetime.strptime(timing, '%H:%M')
+    adjust = relativedelta(seconds=60)
+    newww=adjust+date_time_obj
+    x =  datetime.now()
+    x = str(x.hour)+":"+str(x.minute)
+    date_time_obj2 = datetime.strptime(x, '%H:%M')
+    y=date_time_obj-date_time_obj2
+    yy=newww-date_time_obj2
+    total_seconds = y.total_seconds()
+    total_seconds2 = yy.total_seconds()
+    minutes = total_seconds/3600
+    minutes2 = total_seconds2/3600
+    if minutes%0.25==0:
+      final=minutes
+    else:
+      final =minutes2
+    sign=''
+    if final<-12:
+      final=24-abs(final)
+    if final>13:
+      final=(24-final)*-1
+    if final>=0:
+      sign='+'
+    output=f"Selected the timezone closest to your current time. **(UTC {sign}{final})**"
+    await ctx.send(f"{output}")
+    selfmatches = db.prefix("u"+str(ctx.author.id))
+    if len(selfmatches)==1:
+      profile=db["u"+str(ctx.author.id)]
+      print(profile)
+
+
+  
+  @st.error
+  async def st_error(self,ctx, error):
+    if isinstance(error,commands.MissingRequiredArgument):
+      await ctx.send(f"Please provide your current time in the following format: `[Hour]:[Minute][am/pm]`. Example: 12:00pm\nYou can also provide your time by the 24h clock. Example: 23:40 (11:40pm by the 12h clock/standard time)")
+    elif isinstance(error,commands.BadArgument):
+      await ctx.send(f"```Please provide a valid time.```")
+
+  @commands.command()
+  async def reminders(self,ctx):
+    matches = db.prefix("r"+str(ctx.author.id))
+    output='__Your Reminders__\n'
+    if len(matches)==0:
+      return await ctx.send(f"You have no reminders.\nSet one using `{server_prefix(ctx)}remind [Duration] [Message]` for a reminder in this channel or `{server_prefix(ctx)}dmremind [Duration] [Message]` for a reminder in a Watchdog direct message.")
+    for key in matches:
+      broken=db[key].split(',')
+      ID=str(key)[19:]
+      notif=broken[-1]
+      Location=''
+      Expected_time=''
+      if broken[0]=="dm":
+        Location="<@744979574454091890> DM"
+        Expected_time=broken[1]
+      else:
+        Location="<#"+broken[1]+">"
+        Expected_time=broken[0]
+
+      current = datetime.now()
+      date_time_obj = datetime.strptime(Expected_time, '%Y-%m-%d %H:%M:%S')
+      tdelta=date_time_obj-current
+      the_last=display_time(tdelta.total_seconds()+1, 4)
+
+      new_data=f"**ID - {ID}** | Message: {notif}\nLocation: {Location} in {the_last} from now (at {Expected_time} UTC)\n"
+      output+=new_data
+    
+    output+=f"\nCancel a reminder using `{server_prefix(ctx)}delremind [ID]`.\nIf you want to cancel all reminders use `{server_prefix(ctx)}delremind all`.\nFor cancelling multiple reminders, use `{server_prefix(ctx)}delremind [IDs seperated by spaces]`."
+    
+    await ctx.send(output)
+    
+    
+  @commands.command()
+  async def delremind(self,ctx,*,x):
+    delete_list=x.split(" ")
+    if len(delete_list)==1 and delete_list[0]=="all":
+      matches = db.prefix("r"+str(ctx.author.id))
+      for key in matches:
+        del db[key]
+      return await ctx.send("Cancelled all your reminders :dog:")
+    else:
+      output="__Cancelled Reminders__\n"
+      outputalt="__Invalid IDs You Provided__\n"
+      for ID in delete_list:
+        matches = db.prefix("r"+str(ctx.author.id)+ID)
+        if len(matches)==1:
+          broken=db["r"+str(ctx.author.id)+ID].split(',')
+          output+=f"**{ID}:** {broken[-1]}\n"
+          del db["r"+str(ctx.author.id)+ID]
+        else:
+          outputalt+=f"**{ID}**\n"
+      if len(outputalt)==29:
+        await ctx.send(output)
+      elif len(outputalt)!=29 and len(output)==24:
+        await ctx.send(outputalt)
+      else:
+        await ctx.send(output+'\n'+outputalt)
+
+  @delremind.error
+  async def delremind_error(self,ctx,error):
+      if isinstance(error,commands.MissingRequiredArgument):
+        await ctx.send(f"```Please provide the IDs of the reminders you want to cancel.```")
+      
+  
+  @commands.command()
+  async def remind(self,ctx,duration:DurationConverter,*,message):
+    h,d,mo,y,w,m,s=duration
+    current_count=int(db["totalreminders"])+1
+    db["totalreminders"]=str(current_count)
+    current = datetime.now()
+    delta = relativedelta(hours=h, days=d, months=mo, years=y, weeks=w, minutes=m, seconds=s)
+    new = current+delta
+    tdelta=new-datetime.now()
+    new=new.strftime("%Y-%m-%d %H:%M:%S")
+    the_last=display_time(tdelta.total_seconds()+1, 4)
+    new_value=str(new)+','+str(ctx.channel.id)+','+str(ctx.author.id)+','+message
+    db["r"+str(ctx.author.id)+str(current_count)]=new_value
+    await ctx.send(f"**Set a reminder for: **{the_last} from now ({str(new)} UTC)\n**Message: **{message}\nYou will be reminded in this channel.")
+
+  @commands.command()
+  async def dmremind(self,ctx,duration:DurationConverter,*,message):
+    h,d,mo,y,w,m,s=duration
+    current_count=int(db["totalreminders"])+1
+    db["totalreminders"]=str(current_count)
+    current = datetime.now()
+    delta = relativedelta(hours=h, days=d, months=mo, years=y, weeks=w, minutes=m, seconds=s)
+    new = current+delta
+    tdelta=new-datetime.now()
+    new=new.strftime("%Y-%m-%d %H:%M:%S")
+    the_last=display_time(tdelta.total_seconds()+1, 4)
+    new_value="dm,"+str(new)+','+str(ctx.author.id)+','+message
+    db["r"+str(ctx.author.id)+str(current_count)]=new_value
+    await ctx.send(f"**Set a reminder for: **{the_last} from now ({str(new)} UTC)\n**Message: **{message}\nYou will recieve the reminder in a direct message from Watchdog.")
+
+  @remind.error
+  async def remind_error(self, ctx, error):
+    if isinstance(error,commands.MissingRequiredArgument):
+      await ctx.send(f"```Please provide the amount of time before the reminder and a message you want in the reminder.```")
+    elif isinstance(error,commands.BadArgument):
+      await ctx.send(f"```Please provide a valid duration.```")
+  
+  @dmremind.error
+  async def dmremind_error(self, ctx, error):
+    if isinstance(error,commands.MissingRequiredArgument):
+      await ctx.send(f"```Please provide the amount of time before the reminder and a message you want in the reminder.```")
+    elif isinstance(error,commands.BadArgument):
+      await ctx.send(f"```Please provide a valid duration.```")
+
+  
+
+def setup(client):
+  client.add_cog(Tools(client))

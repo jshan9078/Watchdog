@@ -4,9 +4,10 @@ import json
 from discord.ext import commands
 from discord.ext.commands import has_permissions
 from discord.utils import find
-from datetime import datetime #reminders
-from dateutil.relativedelta import relativedelta
-from main import DurationConverter, display_time, server_prefix
+#from datetime import datetime #reminders
+#from dateutil.relativedelta import relativedelta
+#from main import DurationConverter, display_time, server_prefix
+from main import server_prefix
 
 class Configuration(commands.Cog):
 
@@ -18,6 +19,7 @@ class Configuration(commands.Cog):
     x = server_prefix(ctx)
     await ctx.send(f"```Current Prefix for Watchdog: {x}```")
 
+  """
   @commands.command()
   @commands.has_permissions(manage_channels=True)
   async def interval(self,ctx,duration: DurationConverter):
@@ -63,6 +65,8 @@ class Configuration(commands.Cog):
       await ctx.send(f"```Please provide the amount of time you want in between live stat updates.```")
     elif isinstance(error,commands.BadArgument):
       await ctx.send(f"```Please provide a valid duration.```")
+  
+  """
     
   @commands.command()
   @commands.has_permissions(manage_channels=True)
@@ -127,10 +131,10 @@ class Configuration(commands.Cog):
     new_general=chat
     db["s"+str(ctx.guild.id)+"l"] = str(new_general.id)
     matches = db.prefix("s"+str(ctx.guild.id)+"l")
-    for i in range(len(matches)):
-      print(matches[i],db[matches[i]])
     await ctx.send(f"**Your server's logs channel is now {new_general.mention}\nID: {new_general.id} **")
 
+
+  """
   @commands.command()
   @commands.has_permissions(manage_channels=True)
   async def livestats(self,ctx,chat: commands.TextChannelConverter):
@@ -148,9 +152,15 @@ class Configuration(commands.Cog):
     db["i"+str(ctx.guild.id)]=str(new_value)
     db["s"+str(ctx.guild.id)+"bot"] = "0"
     matches = db.prefix("s"+str(ctx.guild.id)+"ls")
-    for i in range(len(matches)):
-      print(matches[i],db[matches[i]])
     await ctx.send(f"**Your server's live stats channel is now {new_general.mention}\nID: {new_general.id}\nYour server will get live updates every 1 hour. If you want to change the timing, use the interval command in the configuration section.**")
+  
+  @livestats.error
+  async def livestats_error(self, ctx, error):
+    if isinstance(error,commands.MissingRequiredArgument):
+      await ctx.send("```Please include the channel you would like to set as your server's live stats channel.```")
+    elif isinstance(error,commands.ChannelNotFound):
+      await ctx.send("```Please include a valid channel you would like to set as your server's live stats channel.```")
+  """
 
   @commands.command()
   @commands.has_permissions(manage_channels=True)
@@ -183,13 +193,6 @@ class Configuration(commands.Cog):
       await ctx.send("```Please include the channel you would like to set as your server's logs channel.```")
     elif isinstance(error,commands.ChannelNotFound):
       await ctx.send("```Please include a valid channel you would like to set as your server's logs channel.```")
-  
-  @livestats.error
-  async def livestats_error(self, ctx, error):
-    if isinstance(error,commands.MissingRequiredArgument):
-      await ctx.send("```Please include the channel you would like to set as your server's live stats channel.```")
-    elif isinstance(error,commands.ChannelNotFound):
-      await ctx.send("```Please include a valid channel you would like to set as your server's live stats channel.```")
 
   @commands.Cog.listener()
   async def on_guild_join(self, guild):
@@ -219,8 +222,6 @@ class Configuration(commands.Cog):
 
       embed.set_footer(text="Thanks for using Watchdog.")
       await general.send(embed=embed)
-
-    print(db.keys())
   
 def setup(client):
   client.add_cog(Configuration(client))
